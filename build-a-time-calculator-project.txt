@@ -1,0 +1,50 @@
+def add_time(start, duration, starting_day=None):
+    # Helper function to convert 12-hour time to minutes
+    def time_to_minutes(time_str):
+        time, period = time_str.split()
+        hours, minutes = map(int, time.split(':'))
+        if period == 'PM' and hours != 12:
+            hours += 12
+        if period == 'AM' and hours == 12:
+            hours = 0
+        return hours * 60 + minutes
+
+    # Helper function to convert minutes back to 12-hour time
+    def minutes_to_time(minutes):
+        days, minutes = divmod(minutes, 1440)  # 1440 minutes in a day
+        hours, minutes = divmod(minutes, 60)
+        period = 'AM'
+        if hours >= 12:
+            period = 'PM'
+            if hours > 12:
+                hours -= 12
+        elif hours == 0:
+            hours = 12
+        return f"{hours}:{minutes:02d} {period}", days
+
+    # Helper function to calculate the day of the week
+    def get_day_of_week(start_day, days_later):
+        days_of_week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        start_day_index = days_of_week.index(start_day.capitalize())
+        return days_of_week[(start_day_index + days_later) % 7]
+
+    # Convert start time and duration to minutes
+    start_minutes = time_to_minutes(start)
+    duration_hours, duration_minutes = map(int, duration.split(':'))
+    duration_total_minutes = duration_hours * 60 + duration_minutes
+
+    # Calculate new time in minutes
+    new_time_minutes = start_minutes + duration_total_minutes
+    new_time, days_later = minutes_to_time(new_time_minutes)
+
+    # Format the result
+    result = new_time
+    if starting_day:
+        result_day = get_day_of_week(starting_day, days_later)
+        result += f", {result_day}"
+    if days_later == 1:
+        result += " (next day)"
+    elif days_later > 1:
+        result += f" ({days_later} days later)"
+
+    return result
